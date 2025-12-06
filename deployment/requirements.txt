@@ -195,9 +195,6 @@ sentence-transformers==5.1.2
 spacy==3.8.11
 starlette==0.48.0
 tensorflow==2.19.0
-torch==2.9.0+cu126
-torchaudio==2.9.0+cu126
-torchvision==0.24.0+cu126
 tqdm==4.67.1
 transformers==4.57.2
 triton==3.5.0
@@ -206,3 +203,11 @@ uvicorn[standard]==0.38.0
 fastapi
 python-dotenv
 python-multipart
+
+# REMOVED LINES (they break Docker builds):
+# torch==2.9.0+cu126
+# torchaudio==2.9.0+cu126
+# torchvision==0.24.0+cu126
+# google-colab @ file://...
+# jupyter_kernel_gateway @ git+...
+# cyipopt==1.5.0
