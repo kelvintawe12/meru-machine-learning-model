@@ -90,7 +90,6 @@ diffusers==0.35.2
 dill==0.3.8
 distributed==2025.9.1
 distro==1.9.0
-dlib==19.24.6
 dm-tree==0.1.9
 docstring_parser==0.17.0
 docutils==0.21.2
@@ -130,7 +129,6 @@ fsspec==2025.3.0
 future==1.0.0
 gast==0.6.0
 gcsfs==2025.3.0
-GDAL==3.8.4
 gdown==5.2.0
 geemap==0.35.3
 geocoder==1.38.1
