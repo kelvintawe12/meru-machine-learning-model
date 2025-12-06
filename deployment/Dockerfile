@@ -1,4 +1,3 @@
-
 # Use an official Python runtime as a parent image
 FROM python:3.9-slim-buster
 
@@ -9,8 +8,8 @@ WORKDIR /app
 COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entire deployment directory into the container at /app
-COPY deployment/ /app/
+# Copy everything in the deployment folder into /app
+COPY . /app/
 
 # Expose port 8000 for the FastAPI application
 EXPOSE 8000
