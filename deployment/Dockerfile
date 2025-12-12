@@ -1,25 +1,32 @@
-# Official RAPIDS 25.10 + CUDA 12.5 + Python 3.12 base image
-# Already includes cudf, cuml, cugraph, rmm, raft, etc. → no need to pip install them
-FROM rapidsai/base:25.10-cuda12-py3.12
+# Lightweight Python base image for FastAPI application
+FROM python:3.12-slim
 
-# Avoid interactive prompts & fix permissions
-ENV DEBIAN_FRONTEND=noninteractive \
-    PYTHONUNBUFFERED=1
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
+# Set working directory
 WORKDIR /app
 
-# Copy your original requirements.txt
-COPY requirements.txt .
+# Install system dependencies if needed (none needed for this app)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install ONLY the packages that are NOT already in the RAPIDS image
-# (this automatically skips all the cu12/cudf/cuml lines because they are satisfied)
-RUN pip install --no-cache-dir -r requirements.txt && \
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
     rm -rf /root/.cache/pip
 
-# Copy your app code
-COPY . /app/
+# Copy application code
+COPY . .
 
+# Create models directory if it doesn't exist
+RUN mkdir -p models
+
+# Expose port
 EXPOSE 8000
 
-# Run FastAPI
+# Run the application
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
