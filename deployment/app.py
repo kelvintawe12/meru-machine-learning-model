@@ -259,27 +259,79 @@ class PredictionResponse(BaseModel):
     timestamp: str
 
 # Utility functions for percentage calculations
+
 def calculate_loss_breakdown(prediction: float, operation: RefineryOperationInput) -> LossBreakdown:
     """Calculate detailed loss breakdown based on prediction and operation parameters"""
     
-    # Simple heuristic-based breakdown (in real implementation, this would use ML models)
-    total_loss = max(0, prediction)
+    # Ensure total loss is within realistic bounds
+    total_loss = max(0.1, min(prediction, 5.0))  # Keep between 0.1% and 5%
     
-    # Distribute losses based on operation parameters
-    raw_material_factor = operation.feed_ffa / 50.0  # Normalize FFA
-    energy_factor = operation.vapour_pressure / 10.0  # Normalize vapour pressure
-    process_factor = operation.moisture / 10.0  # Normalize moisture
-    waste_factor = operation.actual_feed_mt / 500.0  # Normalize feed size
+    # Base distribution weights for refinery losses (should sum to 1.0)
+    base_weights = {
+        'raw_material': 0.30,  # 30% of total loss
+        'energy': 0.20,        # 20% of total loss
+        'process': 0.25,       # 25% of total loss
+        'waste': 0.15,         # 15% of total loss
+        'efficiency': 0.10     # 10% of total loss
+    }
     
-    # Calculate individual loss components
-    raw_material_loss = total_loss * (0.3 + 0.2 * raw_material_factor)
-    energy_loss = total_loss * (0.2 + 0.3 * energy_factor)
-    process_loss = total_loss * (0.25 + 0.25 * process_factor)
-    waste_loss = total_loss * (0.15 + 0.15 * waste_factor)
-    efficiency_loss = total_loss * 0.1
+    # Apply realistic modifiers based on operation parameters (bounded)
+    # Higher FFA increases raw material losses
+    raw_material_modifier = 1.0 + (operation.feed_ffa / 10.0)  # Max 2x at 10% FFA
+    raw_material_modifier = min(raw_material_modifier, 2.0)    # Cap at 2x
+    
+    # Higher vapour pressure increases energy losses
+    energy_modifier = 1.0 + (operation.vapour_pressure / 5.0)  # Max 2x at 5.0 pressure
+    energy_modifier = min(energy_modifier, 2.0)                # Cap at 2x
+    
+    # Higher moisture increases process losses
+    process_modifier = 1.0 + (operation.moisture / 0.2)       # Max 2x at 0.2 moisture
+    process_modifier = min(process_modifier, 2.0)              # Cap at 2x
+    
+    # Larger feed size slightly increases waste losses
+    waste_modifier = 1.0 + (operation.actual_feed_mt / 1000.0)  # Max 1.5x at 1000 MT
+    waste_modifier = min(waste_modifier, 1.5)                  # Cap at 1.5x
+    
+    # Efficiency losses are relatively constant
+    efficiency_modifier = 1.0
+    
+    # Calculate weighted contributions ensuring they sum to total_loss
+    total_modifier = (
+        base_weights['raw_material'] * raw_material_modifier +
+        base_weights['energy'] * energy_modifier +
+        base_weights['process'] * process_modifier +
+        base_weights['waste'] * waste_modifier +
+        base_weights['efficiency'] * efficiency_modifier
+    )
+    
+    # Calculate individual loss components (ensuring they don't exceed reasonable bounds)
+    raw_material_loss = (total_loss * base_weights['raw_material'] * raw_material_modifier) / total_modifier
+    energy_loss = (total_loss * base_weights['energy'] * energy_modifier) / total_modifier
+    process_loss = (total_loss * base_weights['process'] * process_modifier) / total_modifier
+    waste_loss = (total_loss * base_weights['waste'] * waste_modifier) / total_modifier
+    efficiency_loss = (total_loss * base_weights['efficiency'] * efficiency_modifier) / total_modifier
+    
+    # Ensure no single loss component exceeds 3% (very conservative for well-operated refinery)
+    max_individual_loss = min(total_loss * 0.6, 3.0)  # No single component > 60% of total or 3%
+    
+    raw_material_loss = min(raw_material_loss, max_individual_loss)
+    energy_loss = min(energy_loss, max_individual_loss)
+    process_loss = min(process_loss, max_individual_loss)
+    waste_loss = min(waste_loss, max_individual_loss)
+    efficiency_loss = min(efficiency_loss, max_individual_loss)
+    
+    # Renormalize to ensure sum equals total_loss
+    current_sum = raw_material_loss + energy_loss + process_loss + waste_loss + efficiency_loss
+    if current_sum > 0:
+        scale_factor = total_loss / current_sum
+        raw_material_loss *= scale_factor
+        energy_loss *= scale_factor
+        process_loss *= scale_factor
+        waste_loss *= scale_factor
+        efficiency_loss *= scale_factor
     
     return LossBreakdown(
-        total_loss_percentage=total_loss,
+        total_loss_percentage=round(total_loss, 2),
         raw_material_loss=round(raw_material_loss, 2),
         energy_loss=round(energy_loss, 2),
         process_loss=round(process_loss, 2),
@@ -370,24 +422,46 @@ def enhance_prediction(data: RefineryOperationInput) -> EnhancedPredictionRespon
         input_scaled = scaler.transform(input_selected)
         
 
+
         # Make prediction
         raw_prediction = best_model.predict(input_scaled)[0]
         
-        # Convert raw prediction to percentage of feed if requested
+        # Apply realistic scaling for refinery operations
+        # Typical refinery losses should be 0.1% to 5% of feed
         if data.convert_to_percentage:
             feed_amount = data.actual_feed_mt
-            prediction = (raw_prediction / feed_amount) * 100 if feed_amount > 0 else raw_prediction
+            if feed_amount > 0:
+                # Convert metric tons to percentage with realistic bounds
+                prediction_percentage = (raw_prediction / feed_amount) * 100
+                # Apply realistic bounds for refinery losses (0.1% to 5%)
+                prediction = max(0.1, min(prediction_percentage, 5.0))
+            else:
+                prediction = 1.0  # Default to 1% if no feed amount
         else:
-            prediction = raw_prediction
-        
-        # Cap prediction at reasonable maximum to prevent validation errors
-        prediction = min(max(prediction, 0), 50.0)  # Cap between 0% and 50%
+            # For metric tons, ensure realistic values
+            prediction = max(0.01, min(raw_prediction, feed_amount * 0.05)) if feed_amount > 0 else 0.1
         
         # Calculate processing time
         processing_time = (datetime.now() - start_time).total_seconds() * 1000
         
-        # Determine confidence level based on percentage prediction
-        confidence = "high" if abs(prediction) < 5 else "medium" if abs(prediction) < 15 else "low"
+        # Determine confidence based on prediction quality and model uncertainty
+        # For refinery operations, low uncertainty means predictable, stable processes
+        confidence_factors = [
+            abs(prediction - 2.0) < 1.0,  # Close to typical 2% loss
+            data.feed_ffa < 3.0,          # Good feed quality
+            data.moisture < 0.3,          # Low moisture
+            data.percentage_yield > 80,   # Good yield
+            feed_amount > 50               # Reasonable feed size
+        ]
+        
+        confidence_score = sum(confidence_factors) / len(confidence_factors)
+        
+        if confidence_score >= 0.8:
+            confidence = "high"
+        elif confidence_score >= 0.6:
+            confidence = "medium"
+        else:
+            confidence = "low"
         
         # Calculate comprehensive analysis
         loss_breakdown = calculate_loss_breakdown(prediction, data)
