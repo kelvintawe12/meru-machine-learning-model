@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "framework": null,
+  "buildCommand": "pip install -r requirements.txt",
+  "outputDirectory": ".",
+  "installCommand": "pip install -r requirements.txt",
+  "devCommand": "python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000",
+  "functions": {
+    "app.py": {
+      "runtime": "python3.9",
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
+  ],
+  "env": {
+    "VERCEL": "1",
+    "PYTHONPATH": "/opt/python",
+    "MODEL_PATH": "/opt/python/optimized_models"
+  }
+}

@@ -1,0 +1,335 @@
+/* Mount Meru SoyCo Dashboard Styles */
+
+.App {
+  text-align: center;
+}
+
+/* Brand Colors */
+:root {
+  --meru-primary: #2E7D32;
+  --meru-primary-light: #4CAF50;
+  --meru-primary-dark: #1B5E20;
+  --meru-secondary: #1976D2;
+  --meru-accent: #FF9800;
+  --meru-success: #4CAF50;
+  --meru-warning: #FF9800;
+  --meru-error: #F44336;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--meru-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--meru-primary-dark);
+}
+
+/* Loading Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Card Hover Effects */
+.card-hover {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 8px 24px rgba(46, 125, 50, 0.15);
+}
+
+/* Status Indicators */
+.status-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-online {
+  background-color: var(--meru-success);
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+}
+
+.status-offline {
+  background-color: var(--meru-error);
+}
+
+.status-warning {
+  background-color: var(--meru-warning);
+}
+
+/* Chart Container */
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.chart-container h3 {
+  color: var(--meru-primary);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+/* Metric Cards */
+.metric-card {
+  background: linear-gradient(135deg, var(--meru-primary), var(--meru-primary-light));
+  color: white;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0px 4px 12px rgba(46, 125, 50, 0.2);
+}
+
+.metric-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.metric-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.metric-change {
+  font-size: 0.8rem;
+  margin-top: 8px;
+  opacity: 0.9;
+}
+
+/* Alert Styles */
+.alert-critical {
+  background: linear-gradient(135deg, var(--meru-error), #E57373);
+  color: white;
+}
+
+.alert-warning {
+  background: linear-gradient(135deg, var(--meru-warning), #FFB74D);
+  color: white;
+}
+
+.alert-success {
+  background: linear-gradient(135deg, var(--meru-success), #81C784);
+  color: white;
+}
+
+/* Real-time Indicator */
+.real-time-indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 20px;
+  color: var(--meru-success);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.real-time-indicator::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--meru-success);
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .metric-value {
+    font-size: 2rem;
+  }
+  
+  .chart-container {
+    padding: 16px;
+  }
+}
+
+/* Custom Button Styles */
+.btn-meru {
+  background: linear-gradient(135deg, var(--meru-primary), var(--meru-primary-light));
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-meru:hover {
+  background: linear-gradient(135deg, var(--meru-primary-dark), var(--meru-primary));
+  transform: translateY(-2px);
+  box-shadow: 0px 4px 12px rgba(46, 125, 50, 0.3);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.dashboard-grid-full {
+  grid-column: 1 / -1;
+}
+
+/* Refinery Visualization */
+.refinery-visualization {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background: linear-gradient(135deg, #E8F5E8, #F1F8E9);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.refinery-unit {
+  position: absolute;
+  background: var(--meru-primary);
+  border-radius: 8px;
+  color: white;
+  padding: 12px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.refinery-unit:hover {
+  background: var(--meru-primary-light);
+  transform: scale(1.05);
+}
+
+.refinery-unit.efficient {
+  background: var(--meru-success);
+}
+
+.refinery-unit.warning {
+  background: var(--meru-warning);
+}
+
+.refinery-unit.critical {
+  background: var(--meru-error);
+}
+
+/* Data Table */
+.data-table {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.data-table .MuiDataGrid-root {
+  border: none;
+}
+
+.data-table .MuiDataGrid-columnHeaders {
+  background-color: var(--meru-primary);
+  color: white;
+}
+
+/* Progress Indicators */
+.progress-circular {
+  position: relative;
+  display: inline-block;
+}
+
+.progress-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--meru-primary);
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .chart-container {
+    break-inside: avoid;
+  }
+}
+
