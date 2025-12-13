@@ -72,10 +72,10 @@ class ModelManager:
                     return False
                 
 
+
                 try:
-                    # Load compressed model files
-                    with gzip.open(file_path, 'rb') as f:
-                        self.models[model_name] = pickle.load(f)
+                    # Load model files (joblib handles .pkl.gz compression automatically)
+                    self.models[model_name] = joblib.load(file_path)
                     logger.info(f"Successfully loaded {model_name}")
                 except Exception as e:
                     logger.error(f"Failed to load {model_name}: {str(e)}")
