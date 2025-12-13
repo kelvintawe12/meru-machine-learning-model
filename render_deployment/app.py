@@ -1,4 +1,5 @@
 
+
 import uvicorn
 import os
 import logging
@@ -13,6 +14,8 @@ from datetime import datetime
 import uuid
 import asyncio
 from enum import Enum
+import gzip
+import pickle
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -53,12 +56,13 @@ class ModelManager:
                 logger.error(f"Models directory not found: {models_dir}")
                 return False
             
+
             # Load each model with individual error handling
             model_files = {
-                'best_model_real': 'best_real_loss_model.pkl',
-                'scaler_real': 'real_scaler.pkl',
-                'poly_real': 'poly_real.pkl',
-                'selector_real': 'selector_real.pkl'
+                'best_model_real': 'best_real_loss_model.pkl.gz',
+                'scaler_real': 'real_scaler.pkl.gz',
+                'poly_real': 'poly_real.pkl.gz',
+                'selector_real': 'selector_real.pkl.gz'
             }
             
             for model_name, filename in model_files.items():
@@ -67,8 +71,11 @@ class ModelManager:
                     logger.error(f"Model file not found: {file_path}")
                     return False
                 
+
                 try:
-                    self.models[model_name] = joblib.load(file_path)
+                    # Load compressed model files
+                    with gzip.open(file_path, 'rb') as f:
+                        self.models[model_name] = pickle.load(f)
                     logger.info(f"Successfully loaded {model_name}")
                 except Exception as e:
                     logger.error(f"Failed to load {model_name}: {str(e)}")
