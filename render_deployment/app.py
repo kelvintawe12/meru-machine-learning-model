@@ -497,13 +497,14 @@ def enhance_prediction(data: RefineryOperationInput) -> EnhancedPredictionRespon
         raise HTTPException(status_code=500, detail=f"Enhanced prediction failed: {str(e)}")
 
 
+
 @app.on_event("startup")
 async def startup_event():
     """Load models on application startup"""
     logger.info("Starting Enhanced Refinery Operations API...")
     
     # Determine models directory based on environment
-    models_dir = os.getenv("MODELS_DIR", "models")
+    models_dir = os.getenv("MODEL_PATH", "optimized_models")
     logger.info(f"Looking for models in: {models_dir}")
     
     # Try to load models
