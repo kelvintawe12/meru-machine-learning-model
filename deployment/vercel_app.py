@@ -94,8 +94,9 @@ def load_compressed_model(model_path):
         logger.error(f"Failed to load model {model_path}: {str(e)}")
         return None
 
-def """Load all ML load_models():
-    models (cached for performance)"""
+
+def load_models():
+    """Load all ML models (cached for performance)"""
     global models_cache
     
     if models_cache:
