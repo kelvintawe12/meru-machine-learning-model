@@ -886,6 +886,33 @@ async def analyze_quality(data: QualityAnalysisRequest):
         logger.error(f"Quality analysis error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Quality analysis failed: {str(e)}")
 
+
+@app.get("/")
+async def root():
+    """Root endpoint - API information"""
+    return {
+        "message": "Mount Meru Refinery Operations API",
+        "version": "3.0.0",
+        "status": "operational" if model_manager.is_ready() else "degraded",
+        "models_loaded": model_manager.is_ready(),
+        "description": "Comprehensive API for refinery operations including loss prediction, yield analysis, and process optimization",
+        "endpoints": {
+            "GET /": "This endpoint - API information",
+            "GET /health": "Health check and system status",
+            "GET /models/status": "Model loading status and metadata",
+            "POST /predict": "Single prediction with comprehensive analysis",
+            "POST /predict/legacy": "Legacy prediction endpoint (backward compatibility)",
+            "POST /batch/predict": "Batch predictions with statistical analysis",
+            "POST /analysis/yield": "Detailed yield analysis and recommendations",
+            "POST /analysis/loss-breakdown": "Loss source analysis and improvement opportunities",
+            "POST /analysis/process-efficiency": "Process efficiency analysis and bottleneck identification",
+            "POST /optimize/parameters": "Parameter optimization suggestions",
+            "POST /analysis/quality": "Quality analysis and compliance assessment"
+        },
+        "documentation": "Full API documentation available at /docs",
+        "timestamp": datetime.now().isoformat()
+    }
+
 @app.get("/docs")
 async def get_docs():
     """API documentation and endpoint overview"""
@@ -894,6 +921,7 @@ async def get_docs():
         "version": "3.0.0",
         "description": "Comprehensive API for refinery operations including loss prediction, yield analysis, and process optimization",
         "endpoints": {
+            "GET /": "API information and status",
             "GET /health": "Health check and system status",
             "GET /models/status": "Model loading status and metadata",
             "POST /predict": "Single prediction with comprehensive analysis",
